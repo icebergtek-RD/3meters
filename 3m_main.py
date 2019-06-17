@@ -111,7 +111,7 @@ print(result)
 #phone.write('AT+CIPSEND=0,80\r')
 #time.sleep(2)
 #result = phone.read(100)
-phone.write('AT+CIPSEND=80\r')
+phone.write('AT+CIPSEND=150\r')
 time.sleep(2)
 result = phone.read(100)
 print(result)
@@ -137,8 +137,7 @@ phone.close
 #    humi = 80
 #    pres = 1015
 #    timeQ = strftime("%Y%m%d%H%M%S")
-#    url = 'https://api.thingspeak.com/update?api_key=U5B58NFP38B5BTV6&field1='+
-str(temp)+'&field2='+str(humi)+'&field3='+str(pres)+'&field4='+timeQ
+#    url = 'https://api.thingspeak.com/update?api_key=U5B58NFP38B5BTV6&field1='+str(temp)+'&field2='+str(humi)+'&field3='+str(pres)+'&field4='+timeQ
 #    res = urlopen(url).read()
 #    print(res)
 #    break
