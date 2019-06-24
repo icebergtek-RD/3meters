@@ -4,9 +4,10 @@ import time
 from time import gmtime, strftime
 #from urllib.request import urlopen
 #from serial import Serial
-
+import os
 import ctypes as ct
 import serial
+import schedule
 #from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 
 
@@ -85,7 +86,7 @@ def Hash(data):
 
 #print(str(Hash("$ANMR,0912000000,19/06/12-16:14:00,100,00000000,00000000,00000000,436F3720,4386D1EE,437C0C3D,42A26FF6,42A61BCC,429D550A,48339980,00000000")) )   
 
-def at_command(msg_to_server,server_ip,server_port):
+def at_command(msg_to_server,server_ip,server_port,idn):
 	phone = serial.Serial("/dev/ttyUSB3",119200,timeout=5,rtscts=True,dsrdtr=True)
 	phone.write('AT+CSTT="twm.nbiot"\r')
 	time.sleep(0.5)
@@ -116,7 +117,7 @@ def at_command(msg_to_server,server_ip,server_port):
 	time.sleep(2)
 	result = phone.read(100)
 	print(result)
-	msg_to_server = msg_to_server + '\n#026\r'
+	msg_to_server = str(msg_to_server) + '\n#026\r'
 	phone.write(msg_to_server)
 	#phone.write(0x1a)
 	time.sleep(10)
@@ -140,44 +141,77 @@ def get_wq(dev,addr):
     client = ModbusClient(method='rtu',port=dev,timeout=1,stopbits=1,bytesize=8,parity='N',baudrate=9600)
     client.connect()
     rr=client.read_input_registers(addr,1,unit=1);
-    print(rr.registers[0]);
+    #print(rr.registers[0]);
+    return rr
+
+#def read_config_file(cdir):
+
+
+#def write_config_file():
+
+
 
 ### set up for sending data
-ip = "220.133.128.61"
-port = "48877"
 
-### set up for sending message
-msg = "$ANMR,"
-pid = "2019030001"
-timeQ = strftime("%d/%m/%Y-%H:%M:%S")
-power = '100'
-posQ = '00000000'
-negQ = '00000000'
-totalQ = '00000000'
-volt1 = '00000000'
-volt2 = '00000000'
-volt3 = '00000000'
-cur1 = '00000000'
-cur2 = '00000000'
-cur3 = '00000000'
-cWalt = '00000000'
-wLevel = '00000000'
+### Default Configuration
+### ip = "220.133.128.61"
+### port = "48877"
+### pid = "2019039999" ### Testing ID
 
-msg = msg + pid + "," + timeQ + "," + power + "," + timeQ + "," + power + ","
-msg = msg + posQ + "," + negQ + "," + totalQ + "," + volt1 + "," + volt2 + "," + volt3 + ","
-msg = msg + cur1 + "," + cur2 + "," + cur3 + "," + cWalt + "," + wLevel
-crc = Hash(msg)
-msg = msg + "," + crc
-print(msg)
+def work3m():
+
+	### Default Configuration
+	ip = "220.133.128.61"
+	port = "48877"
+	pid = "2019039999" ### Testing ID
+
+	### Read Add-on Configuration if exists ###
+	if os.path.isfile("/home/pi/3meters/config_3m.py"):
+		from config_3m import *
+
+	### set up for sending message
+	msg = "$ANMR,"
+	timeQ = strftime("%d/%m/%Y-%H:%M:%S")
+	power = '100'
+
+	### Water Meter Data Reading =========
+
+	posQ = '00000000' ### for testing
+	#posQf=get_wq(/dev/WQ,108)
+	#posQ=bytes(posQf, encoding = "utf8")
+
+	negQ = '00000000' ### for testing
+	#negQf=get_wq(/dev/WQ,112)
+	#negQ=bytes(negQf, encoding = "utf8")
+
+	totalQ = '00000000' ### for testing
+	## totalQf=posQf+negQf
+	#totalQ=bytes(totalQf, encoding = "utf8")
+
+	### bytes() need input to be str()?
+
+	### ==================================
+
+	volt1 = '00000000'
+	volt2 = '00000000'
+	volt3 = '00000000'
+	cur1 = '00000000'
+	cur2 = '00000000'
+	cur3 = '00000000'
+	cWalt = '00000000'
+	wLevel = '00000000'
+
+	msg = msg + pid + "," + timeQ + "," + power + "," + timeQ + "," + power + ","
+	msg = msg + posQ + "," + negQ + "," + totalQ + "," + volt1 + "," + volt2 + "," + volt3 + ","
+	msg = msg + cur1 + "," + cur2 + "," + cur3 + "," + cWalt + "," + wLevel
+	crc = Hash(msg)
+	msg = msg + "," + crc
+#	print(msg)
+	at_command(msg,ip,port,pid)
 
 
-#while True:
-#    temp = 35
-#    humi = 80
-#    pres = 1015
-#    timeQ = strftime("%Y%m%d%H%M%S")
-#    url = 'https://api.thingspeak.com/update?api_key=U5B58NFP38B5BTV6&field1='+str(temp)+'&field2='+str(humi)+'&field3='+str(pres)+'&field4='+timeQ
-#    res = urlopen(url).read()
-#    print(res)
-#    break
- #   time.sleep(10)
+schedule.every(10).minutes.do(work3m)
+
+while True:
+	schedule.run_pending()
+	time.sleep(1)
