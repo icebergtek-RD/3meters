@@ -5,7 +5,7 @@ New Dongle Modification:
 1. copy folder /xr to /home/pi
 
 
-
+============= New Update =================
 
 2. cp the rc.local in /xr to /etc
 3. cp the crontab to /etc
