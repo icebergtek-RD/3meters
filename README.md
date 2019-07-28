@@ -3,6 +3,10 @@ Ancad 3meters
 
 New Dongle Modification:
 1. copy folder /xr to /home/pi
+
+
+
+
 2. cp the rc.local in /xr to /etc
 3. cp the crontab to /etc
 4. check if rc.local and crontab access is set to be excutable. To be safe, you can do "sudo chmod 666" to these 2 files
