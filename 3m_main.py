@@ -187,6 +187,7 @@ def work3m():
 	print(msg)
 	at_command(msg,ip,port,pid)
 
+os.system("sudo insmod /home/pi/xr/icb/xr_usb_serial_common_lnx-3.6-and-newer-pak/xr_usb_serial_common.ko")
 work3m()
 
 #while True:
